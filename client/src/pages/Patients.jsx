@@ -7,7 +7,13 @@ import { useAuth } from '../context/AuthContext';
 const Patients = () => {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({ name: '', age: '', condition: '', appointmentDate: '', status: 'Pending' });
+  const [formData, setFormData] = useState({ 
+    patient_name: '', 
+    doctor_name: '', 
+    date: '', 
+    time: '', 
+    status: 'Pending' 
+  });
   const [editingId, setEditingId] = useState(null);
   const { logout, user } = useAuth();
 
@@ -17,6 +23,7 @@ const Patients = () => {
       const res = await api.get('/patients');
       setPatients(res.data);
     } catch (error) {
+      console.error(error);
       toast.error('Failed to fetch patients');
     } finally {
       setLoading(false);
@@ -37,7 +44,7 @@ const Patients = () => {
         await api.post('/patients', formData);
         toast.success('Patient added');
       }
-      setFormData({ name: '', age: '', condition: '', appointmentDate: '', status: 'Pending' });
+      setFormData({ patient_name: '', doctor_name: '', date: '', time: '', status: 'Pending' });
       setEditingId(null);
       fetchPatients();
     } catch (error) {
@@ -46,7 +53,13 @@ const Patients = () => {
   };
 
   const handleEdit = (patient) => {
-    setFormData(patient);
+    setFormData({
+      patient_name: patient.patient_name,
+      doctor_name: patient.doctor_name,
+      date: patient.date,
+      time: patient.time,
+      status: patient.status
+    });
     setEditingId(patient.id);
   };
 
@@ -74,33 +87,32 @@ const Patients = () => {
       <div className="container mx-auto p-4">
         <div className="bg-white p-6 rounded shadow mb-8">
           <h2 className="text-lg font-semibold mb-4">{editingId ? 'Edit Patient' : 'Add New Patient'}</h2>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <input
-              placeholder="Name"
-              value={formData.name}
-              onChange={e => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Patient Name"
+              value={formData.patient_name}
+              onChange={e => setFormData({ ...formData, patient_name: e.target.value })}
               className="p-2 border rounded"
               required
             />
             <input
-              placeholder="Age"
-              type="number"
-              value={formData.age}
-              onChange={e => setFormData({ ...formData, age: e.target.value })}
-              className="p-2 border rounded"
-              required
-            />
-            <input
-              placeholder="Condition"
-              value={formData.condition}
-              onChange={e => setFormData({ ...formData, condition: e.target.value })}
+              placeholder="Doctor Name"
+              value={formData.doctor_name}
+              onChange={e => setFormData({ ...formData, doctor_name: e.target.value })}
               className="p-2 border rounded"
               required
             />
             <input
               type="date"
-              value={formData.appointmentDate}
-              onChange={e => setFormData({ ...formData, appointmentDate: e.target.value })}
+              value={formData.date}
+              onChange={e => setFormData({ ...formData, date: e.target.value })}
+              className="p-2 border rounded"
+              required
+            />
+            <input
+              type="time"
+              value={formData.time}
+              onChange={e => setFormData({ ...formData, time: e.target.value })}
               className="p-2 border rounded"
               required
             />
@@ -119,7 +131,7 @@ const Patients = () => {
             {editingId && (
               <button
                 type="button"
-                onClick={() => { setEditingId(null); setFormData({ name: '', age: '', condition: '', appointmentDate: '', status: 'Pending' }); }}
+                onClick={() => { setEditingId(null); setFormData({ patient_name: '', doctor_name: '', date: '', time: '', status: 'Pending' }); }}
                 className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600"
               >
                 Cancel
@@ -135,10 +147,11 @@ const Patients = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-100 border-b">
-                  <th className="p-4">Name</th>
-                  <th className="p-4">Age</th>
-                  <th className="p-4">Condition</th>
+                  <th className="p-4">ID</th>
+                  <th className="p-4">Patient Name</th>
+                  <th className="p-4">Doctor Name</th>
                   <th className="p-4">Date</th>
+                  <th className="p-4">Time</th>
                   <th className="p-4">Status</th>
                   <th className="p-4">Actions</th>
                 </tr>
@@ -146,10 +159,11 @@ const Patients = () => {
               <tbody>
                 {patients.map(patient => (
                   <tr key={patient.id} className="border-b hover:bg-gray-50">
-                    <td className="p-4">{patient.name}</td>
-                    <td className="p-4">{patient.age}</td>
-                    <td className="p-4">{patient.condition}</td>
-                    <td className="p-4">{patient.appointmentDate}</td>
+                    <td className="p-4">{patient.id}</td>
+                    <td className="p-4">{patient.patient_name}</td>
+                    <td className="p-4">{patient.doctor_name}</td>
+                    <td className="p-4">{patient.date}</td>
+                    <td className="p-4">{patient.time}</td>
                     <td className="p-4">
                       <span className={`px-2 py-1 rounded text-sm ${
                         patient.status === 'Completed' ? 'bg-green-100 text-green-800' :
@@ -167,7 +181,7 @@ const Patients = () => {
                 ))}
                 {patients.length === 0 && (
                   <tr>
-                    <td colSpan="6" className="p-8 text-center text-gray-500">No patients found.</td>
+                    <td colSpan="7" className="p-8 text-center text-gray-500">No patients found.</td>
                   </tr>
                 )}
               </tbody>

@@ -2,26 +2,33 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
 const Patient = sequelize.define('Patient', {
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  age: {
+  id: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    primaryKey: true,
+    autoIncrement: true
   },
-  condition: {
+  patient_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  appointmentDate: {
+  doctor_name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  date: {
     type: DataTypes.DATEONLY,
+    allowNull: false
+  },
+  time: {
+    type: DataTypes.TIME,
     allowNull: false
   },
   status: {
     type: DataTypes.ENUM('Pending', 'Completed', 'Cancelled'),
     defaultValue: 'Pending'
   }
+}, {
+  timestamps: true // Adds createdAt and updatedAt automatically
 });
 
 module.exports = Patient;

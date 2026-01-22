@@ -1,0 +1,39 @@
+config:
+  target: "http://localhost:5000"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "Sustained load"
+    - duration: 30
+      arrivalRate: 10
+      rampTo: 20
+      name: "Stress test (ramp up)"
+  processor: "./stress-processor.js"
+
+scenarios:
+  - name: "Login and Fetch Patients"
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            username: "admin"
+            password: "password123"
+          capture:
+            - json: "$.token"
+              as: "token"
+      - think: 1
+      - get:
+          url: "/api/patients"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - think: 1
+      - post:
+          url: "/api/patients"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            patient_name: "Stress Test Patient"
+            doctor_name: "Dr. Load"
+            date: "2026-01-25"
+            time: "10:00:00"
+            status: "Pending"
