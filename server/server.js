@@ -14,18 +14,18 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Swagger Documentation
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Routes
+
 app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 
-// Database sync and server start
+
 sequelize.sync({ force: false }).then(async () => {
   console.log('Database connected');
 
-  // Seed default user
+  
   const admin = await User.findOne({ where: { username: 'admin' } });
   if (!admin) {
     await User.create({ username: 'admin', password: 'password123' });

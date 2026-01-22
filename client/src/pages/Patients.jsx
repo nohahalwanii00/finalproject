@@ -18,11 +18,34 @@ const Patients = () => {
   const { logout, user } = useAuth();
   const [showForm, setShowForm] = useState(false);
 
+  const checkReminders = (data) => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const upcoming = data.filter(p => p.date === tomorrowStr && p.status === 'Pending');
+
+    if (upcoming.length > 0) {
+      toast(`🔔 Reminder: You have ${upcoming.length} appointment(s) tomorrow (${tomorrowStr})!`, {
+        duration: 6000,
+        position: 'top-center',
+        style: {
+          border: '1px solid #0f766e',
+          padding: '16px',
+          color: '#134e4a',
+          background: '#ccfbf1',
+        },
+      });
+    }
+  };
+
   const fetchPatients = async () => {
     setLoading(true);
     try {
       const res = await api.get('/patients');
       setPatients(res.data);
+      checkReminders(res.data);
     } catch (error) {
       console.error(error);
       toast.error('Failed to fetch patients');
