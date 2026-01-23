@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getAllPatients, createPatient, updatePatient, deletePatient } = require('../controllers/patientController');
 const authMiddleware = require('../middleware/authMiddleware');
+const roleMiddleware = require('../middleware/roleMiddleware');
 
 router.use(authMiddleware);
 
@@ -100,6 +101,8 @@ router.post('/', createPatient);
  *   put:
  *     summary: Update a patient appointment
  *     tags: [Patients]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -120,32 +123,34 @@ router.post('/', createPatient);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Patient'
- *       404:
- *         description: Patient not found
  *       400:
  *         description: Bad request
+ *       404:
+ *         description: Patient not found
  */
-router.put('/:id', updatePatient);
+router.put('/:id', roleMiddleware(['admin', 'user']), updatePatient);
 
 /**
  * @swagger
  * /api/patients/{id}:
  *   delete:
- *     summary: Remove a patient appointment
+ *     summary: Delete a patient appointment
  *     tags: [Patients]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
  *         required: true
- *         description: The patient ID
+ *         description: The patient id
  *     responses:
  *       200:
  *         description: The patient was deleted
  *       404:
- *         description: Patient not found
+ *         description: The patient was not found
  */
-router.delete('/:id', deletePatient);
+router.delete('/:id', roleMiddleware(['admin', 'user']), deletePatient);
 
 module.exports = router;

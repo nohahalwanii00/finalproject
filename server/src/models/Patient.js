@@ -28,7 +28,7 @@ const Patient = sequelize.define('Patient', {
     defaultValue: 'Pending'
   }
 }, {
-  timestamps: true // Adds createdAt and updatedAt automatically
+  timestamps: true 
 });
 
 module.exports = Patient;

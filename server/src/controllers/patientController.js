@@ -1,44 +1,57 @@
-const Patient = require('../models/Patient');
+const { getAllPatientsQuery } = require('../cqrs/patientQueries');
+const { createPatientCommand, updatePatientCommand, deletePatientCommand } = require('../cqrs/patientCommands');
+const AppError = require('../utils/AppError');
 
-exports.getAllPatients = async (req, res) => {
+exports.getAllPatients = async (req, res, next) => {
   try {
-    // Simulate delay for loader spinner demo
-    await new Promise(resolve => setTimeout(resolve, 800)); 
-    const patients = await Patient.findAll();
+    const patients = await getAllPatientsQuery();
     res.json(patients);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.createPatient = async (req, res) => {
+exports.createPatient = async (req, res, next) => {
   try {
-    const patient = await Patient.create(req.body);
+    console.log('--- Creating New Patient (CQRS) ---');
+    console.log('Data Received:', req.body);
+    
+    const patient = await createPatientCommand(req.body);
+    
+    console.log('Patient Created Successfully:', patient.toJSON());
     res.status(201).json(patient);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.log('Error Creating Patient:', error.message);
+    next(new AppError(error.message, 400));
   }
 };
 
-exports.updatePatient = async (req, res) => {
+exports.updatePatient = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const [updated] = await Patient.update(req.body, { where: { id } });
-    if (!updated) return res.status(404).json({ message: 'Patient not found' });
-    const updatedPatient = await Patient.findByPk(id);
+    const updatedPatient = await updatePatientCommand(id, req.body);
+    
+    if (!updatedPatient) {
+      return next(new AppError('Patient not found', 404));
+    }
+    
     res.json(updatedPatient);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    next(new AppError(error.message, 400));
   }
 };
 
-exports.deletePatient = async (req, res) => {
+exports.deletePatient = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const deleted = await Patient.destroy({ where: { id } });
-    if (!deleted) return res.status(404).json({ message: 'Patient not found' });
+    const deleted = await deletePatientCommand(id);
+    
+    if (!deleted) {
+      return next(new AppError('Patient not found', 404));
+    }
+    
     res.json({ message: 'Patient deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };

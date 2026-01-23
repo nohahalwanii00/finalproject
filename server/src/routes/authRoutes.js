@@ -30,6 +30,10 @@ const { login, register } = require('../controllers/authController');
  *                 type: string
  *               password:
  *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [admin, user]
+ *                 default: user
  *     responses:
  *       201:
  *         description: User created successfully
@@ -78,6 +82,10 @@ router.post('/register', register);
  *                       type: integer
  *                     username:
  *                       type: string
+ *                     role:
+ *                       type: string
+ *                       enum: [admin, user]
+ *                       example: user
  *       400:
  *         description: Invalid credentials
  *       500:
